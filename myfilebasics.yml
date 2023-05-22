@@ -5,5 +5,5 @@ build:
     build:        
       - pip install -r requirements.txt
 run:
-  command: python application.py
+  command: python apprun.py
 
