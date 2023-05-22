@@ -1,13 +1,35 @@
-version: "3"
-services:
-  cavo:
-    image: index.docker.io/<org>/<image>:<tag>
-    ports:
-      - "443:3443"
-      - "80:3080"
-  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /root/.docker/config.json:/config.json
-    command: --interval 30
+name: Автоматический деплой с использованием Watchtower
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout репозитория
+      uses: actions/checkout@v2
+      
+    - name: Установка Docker и Watchtower
+      run: |
+        sudo apt-get update
+        sudo apt-get install docker.io -y
+        sudo docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower
+        
+    - name: Сборка Docker-контейнера
+      run: |
+        sudo docker build -t myapp .
+      
+    - name: Публикация Docker-контейнера на Docker Hub
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        sudo docker tag myapp ${{ secrets.DOCKERHUB_USERNAME }}/myapp
+        sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/myapp
+        
+    - name: Обновление Docker-контейнера на WAS с использованием Watchtower
+      run: |
+        sudo docker exec watchtower watchtower --run-once --cleanup --label-enable
+        
