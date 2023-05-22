@@ -1,13 +1,9 @@
-version: "3"
-services:
-  myworklab1:
-    image: index.docker.io/<org>/<image>:<tag>
-    ports:
-      - "443:3443"
-      - "80:3080"
-  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /root/.docker/config.json:/config.json
-    command: --interval 30
+version: 1.0
+runtime: python3 
+build:
+  commands:
+    build:        
+      - pip install -r requirements.txt
+run:
+  command: python application.py
+
