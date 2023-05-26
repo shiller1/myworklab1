@@ -1,4 +1,4 @@
-name: Автоматический деплой с использованием Watchtower
+ame: Deploy Docker Container
 
 on:
   push:
@@ -8,28 +8,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout репозитория
+    - name: Checkout code
       uses: actions/checkout@v2
-      
-    - name: Установка Docker и Watchtower
-      run: |
-        sudo apt-get update
-        sudo apt-get install docker.io -y
-        sudo docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower
-        
-    - name: Сборка Docker-контейнера
-      run: |
-        sudo docker build -t myapp .
-      
-    - name: Публикация Docker-контейнера на Docker Hub
-      run: |
-        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-        sudo docker tag myapp ${{ secrets.DOCKERHUB_USERNAME }}/myapp
-        sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/myapp
-        
-    - name: Обновление Docker-контейнера на WAS с использованием Watchtower
-      run: |
-        sudo docker exec watchtower watchtower --run-once --cleanup --label-enable
+
+    - name: Set up Docker
+      uses: actions/setup-docker@v2
+
+    - name: Build Docker image
+      run: docker build -t your-docker-image .
+
+    - name: Log in to Docker Hub
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Push Docker image to Docker Hub
+      run: docker push your-docker-image
+
+    - name: Deploy Docker container
+      run: docker run -d -p 80:80 your-docker-image
         
