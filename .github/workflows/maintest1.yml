@@ -1,4 +1,4 @@
-ame: Deploy Docker Container
+name: Deploy Docker Container
 
 on:
   push:
